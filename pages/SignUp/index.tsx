@@ -1,28 +1,17 @@
+import useInput from '@hooks/useInput';
 import React, { useCallback, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Header, Label, Input, LinkContainer, Button, Form, Error } from './styles';
+import { Header, Label, Input, LinkContainer, Button, Form, Error, Success } from './styles';
+import axios from 'axios';
 
 const SignUp = () => {
-  const [email, setEmail] = useState('');
-  const [nickname, setNickname] = useState('');
+  const [email, onChangeEmail] = useInput('');
+  const [nickname, onChangeNickname] = useInput('');
   const [password, setPassword] = useState('');
   const [passwordCheck, setPasswordCheck] = useState('');
   const [mismatchError, setMismatchError] = useState(false);
-
-  const onChangeEmail = useCallback((e) => {
-    const {
-      target: { value },
-    } = e;
-    setEmail(value);
-  }, []);
-
-  const onChangeNickname = useCallback((e) => {
-    const {
-      target: { value },
-    } = e;
-    setNickname(value);
-  }, []);
-
+  const [signUpError, setSignUpError] = useState('');
+  const [signUpSuccess, setSignUpSuccess] = useState(false);
   const onChangePassword = useCallback(
     (e) => {
       const {
@@ -48,8 +37,27 @@ const SignUp = () => {
   const onSubmit = useCallback(
     (e) => {
       e.preventDefault();
+      if (!mismatchError && nickname) {
+        setSignUpError('');
+        setSignUpSuccess(false);
+        axios
+          .post('/api/users', {
+            email,
+            nickname,
+            password,
+          })
+          .then((response) => {
+            console.log(response);
+            setSignUpSuccess(true);
+          })
+          .catch((error) => {
+            console.log(error.response);
+            setSignUpError(error.response.data);
+          })
+          .finally(() => {});
+      }
     },
-    [password],
+    [email, nickname, password, passwordCheck, mismatchError],
   );
 
   return (
@@ -89,8 +97,12 @@ const SignUp = () => {
             />
           </div>
           {mismatchError && <Error>Check your password again.</Error>}
+          {!nickname && <Error>닉네임을 입력해주세요.</Error>}
+          {signUpError && <Error>{signUpError}</Error>}
         </Label>
+        <Button type="submit">회원가입</Button>
       </Form>
+
       <LinkContainer>
         Do you have account?&nbsp;
         <Link to="/login">Login</Link>
