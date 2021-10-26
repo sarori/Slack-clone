@@ -99,6 +99,7 @@ const SignUp = () => {
           {mismatchError && <Error>Check your password again.</Error>}
           {!nickname && <Error>닉네임을 입력해주세요.</Error>}
           {signUpError && <Error>{signUpError}</Error>}
+          {signUpSuccess && <Success>회원가입되었습니다. 로그인해주세요</Success>}
         </Label>
         <Button type="submit">회원가입</Button>
       </Form>
