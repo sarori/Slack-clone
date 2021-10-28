@@ -51,7 +51,7 @@ const SignUp = () => {
             setSignUpSuccess(true);
           })
           .catch((error) => {
-            console.log(error.response);
+            console.log(error.response.data);
             setSignUpError(error.response.data);
           })
           .finally(() => {});

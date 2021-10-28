@@ -2,13 +2,12 @@ import useInput from '@hooks/useInput';
 import { Button, Error, Form, Header, Input, Label, LinkContainer } from '@pages/SignUp/styles';
 import fetcher from '@utils/fetcher';
 import axios from 'axios';
-import React, { useCallback, useState } from 'react';
-import { Redirect } from 'react-router';
-import { Link } from 'react-router-dom';
+import React, { useCallback, useEffect, useState } from 'react';
+import { Link, Redirect } from 'react-router-dom';
 import useSWR from 'swr';
 
 const LogIn = () => {
-  const { data, error, revalidate } = useSWR('http://localhost:3095/api/users', fetcher);
+  const { data, error, revalidate } = useSWR('/api/users', fetcher);
   const [logInError, setLogInError] = useState(false);
   const [email, onChangeEmail] = useInput('');
   const [password, onChangePassword] = useInput(['']);
@@ -18,28 +17,28 @@ const LogIn = () => {
       setLogInError(false);
       axios
         .post(
-          'http://localhost:3095/api/users/login',
-          {
-            email,
-            password,
-          },
+          '/api/users/login',
+          { email, password },
           {
             withCredentials: true,
           },
         )
-        .then(() => {
+        .then((response) => {
           revalidate();
         })
         .catch((error) => {
-          console.log(error.message);
           setLogInError(error.response?.data?.statusCode === 401);
         });
     },
     [email, password],
   );
-  console.log(data);
-  console.log('error', error);
+
+  // if (data === undefined) {
+  //   return <div>로딩중...</div>;
+  // }
+
   if (data) {
+    console.log('in', data);
     return <Redirect to="/workspace/channel" />;
   }
 
@@ -55,13 +54,13 @@ const LogIn = () => {
         <Label id="email-label">
           <span>Email</span>
           <div>
-            <Input type="email" id="email" value={email} onChange={onChangeEmail} />
+            <Input type="email" id="email" name="email" value={email} onChange={onChangeEmail} />
           </div>
         </Label>
         <Label id="password-label">
           <span>Password</span>
           <div>
-            <Input type="password" id="password" value={password} onChange={onChangePassword} />
+            <Input type="password" id="password" name="password" value={password} onChange={onChangePassword} />
           </div>
           {logInError && <Error>Not matched</Error>}
         </Label>
