@@ -3,11 +3,12 @@ import { Button, Error, Form, Header, Input, Label, LinkContainer } from '@pages
 import fetcher from '@utils/fetcher';
 import axios from 'axios';
 import React, { useCallback, useEffect, useState } from 'react';
-import { Link, Redirect } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import useSWR from 'swr';
+import { Redirect } from 'react-router';
 
 const LogIn = () => {
-  const { data, error, revalidate } = useSWR('/api/users', fetcher);
+  const { data, error, revalidate, mutate } = useSWR('/api/users', fetcher);
   const [logInError, setLogInError] = useState(false);
   const [email, onChangeEmail] = useInput('');
   const [password, onChangePassword] = useInput(['']);
@@ -24,7 +25,8 @@ const LogIn = () => {
           },
         )
         .then((response) => {
-          revalidate();
+          mutate(response.data, false);
+          // revalidate();
         })
         .catch((error) => {
           setLogInError(error.response?.data?.statusCode === 401);
@@ -33,12 +35,11 @@ const LogIn = () => {
     [email, password],
   );
 
-  // if (data === undefined) {
-  //   return <div>로딩중...</div>;
-  // }
+  if (data === undefined) {
+    return <div>Loading...</div>;
+  }
 
   if (data) {
-    console.log('in', data);
     return <Redirect to="/workspace/channel" />;
   }
 
