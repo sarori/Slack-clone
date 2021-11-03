@@ -36,8 +36,8 @@ const DirectMessage = loadable(() => import('@pages/DirectMessage'));
 const Workspace: VFC = () => {
   const { workspace } = useParams<{ workspace: string }>();
   const { data: userData, error, mutate, revalidate } = useSWR<IUser | false>('/api/users', fetcher);
-  const { data: channeldata } = useSWR<IChannel[]>(
-    userData ? `http://localhost:3095/api/workspace/${workspace}/channels` : null,
+  const { data: channelData } = useSWR<IChannel[]>(
+    userData ? `http://localhost:3095/api/workspaces/${workspace}/channels` : null,
     fetcher,
   );
 
@@ -156,6 +156,9 @@ const Workspace: VFC = () => {
                 <button onClick={onLogOut}>로그아웃</button>
               </WorkspaceModal>
             </Menu>
+            {channelData?.map((v) => {
+              return <div>{v.name}</div>;
+            })}
           </MenuScroll>
         </Channels>
         <Chats>
