@@ -43,6 +43,11 @@ const Workspace: VFC = () => {
     fetcher,
   );
 
+  const { data: memberData } = useSWR<IUser[]>(
+    userData ? `http://localhost:3095/api/workspaces/${workspace}/members` : null,
+    fetcher,
+  );
+
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showCreateWorkspaceModal, setShowCreateWorkspaceModal] = useState(false);
   const [showWorkspaceModal, setShowWorkspaceModal] = useState(false);
@@ -166,9 +171,8 @@ const Workspace: VFC = () => {
                 <button onClick={onLogOut}>로그아웃</button>
               </WorkspaceModal>
             </Menu>
-            {channelData?.map((v) => (
-              <div>{v.name}</div>
-            ))}
+            <ChannelList userData={userData} />
+            {/* <DMList userData={userData} /> */}
           </MenuScroll>
         </Channels>
         <Chats>
