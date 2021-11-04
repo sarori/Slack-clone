@@ -1,6 +1,6 @@
 import Modal from '@components/Modal';
 import React, { useCallback, VFC } from 'react';
-import { Button, Label } from '@pages/SignUp/styles';
+import { Button, Input, Label } from '@pages/SignUp/styles';
 import useInput from '@hooks/useInput';
 import axios from 'axios';
 import { useParams } from 'react-router';
@@ -18,9 +18,17 @@ interface Props {
 const CreateChannelModal: VFC<Props> = ({ show, onCloseModal, setShowCreateChannelModal }) => {
   const [newChannel, onChangeNewChannel, setNewChannel] = useInput('');
   const { workspace, channel } = useParams<{ workspace: string; channel: string }>();
-  const { data: userData, error, mutate, revalidate } = useSWR<IUser | false>('/api/users', fetcher);
+  const {
+    data: userData,
+    error,
+    mutate,
+    revalidate,
+  } = useSWR<IUser | false>('http://localhost:3095/api/users', fetcher, {
+    dedupingInterval: 2000,
+  });
+
   const { data: channelData, revalidate: revalidateChannel } = useSWR<IChannel[]>(
-    userData ? `http://localhost:3095/api/workspace/${workspace}/channels` : null,
+    userData ? `http://localhost:3095/api/workspaces/${workspace}/channels` : null,
     fetcher,
   );
 
@@ -37,7 +45,7 @@ const CreateChannelModal: VFC<Props> = ({ show, onCloseModal, setShowCreateChann
             withCredentials: true,
           },
         )
-        .then(() => {
+        .then((response) => {
           setShowCreateChannelModal(false);
           revalidateChannel();
           setNewChannel('');
@@ -49,13 +57,15 @@ const CreateChannelModal: VFC<Props> = ({ show, onCloseModal, setShowCreateChann
     },
     [newChannel],
   );
+  console.log('revalidate', revalidateChannel());
+
   if (!show) return null;
   return (
     <Modal show={show} onCloseModal={onCloseModal}>
       <form onSubmit={onCreateChannel}>
         <Label id="channel-label">
           <span>Channel</span>
-          <input id="channel" value={newChannel} onChange={onChangeNewChannel} />
+          <Input id="channel" value={newChannel} onChange={onChangeNewChannel} />
         </Label>
 
         <Button type="submit">Create</Button>
