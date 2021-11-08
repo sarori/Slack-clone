@@ -20,11 +20,7 @@ const DMList: FC = () => {
     dedupingInterval: 2000, // 2초
   });
   const { data: memberData } = useSWR<IUserWithOnline[]>(
-    userData
-      ? `
-            http://localhost:3095/api/workspaces/${workspace}/members
-        `
-      : null,
+    userData ? `/api/workspaces/${workspace}/members` : null,
     fetcher,
   );
   const [channelCollapse, setChannelCollapse] = useState(false);
@@ -47,6 +43,10 @@ const DMList: FC = () => {
     },
     [workspace],
   );
+  if (!memberData) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <>
       <h2>
