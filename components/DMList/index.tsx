@@ -1,9 +1,10 @@
 import Menu from '@components/Menu';
+import useSocket from '@hooks/useSocket';
 import { LogOutButton, ProfileImg, ProfileModal, RightMenu } from '@layouts/Workspace/styles';
 import { Header } from '@pages/SignUp/styles';
 import { IUser, IUserWithOnline } from '@typings/db';
 import fetcher from '@utils/fetcher';
-import React, { FC, useCallback, useState } from 'react';
+import React, { FC, useCallback, useEffect, useState } from 'react';
 import { useParams } from 'react-router';
 import { NavLink } from 'react-router-dom';
 import useSWR from 'swr';
@@ -23,6 +24,7 @@ const DMList: FC = () => {
     userData ? `/api/workspaces/${workspace}/members` : null,
     fetcher,
   );
+  const [socket] = useSocket(workspace);
   const [channelCollapse, setChannelCollapse] = useState(false);
   const [countList, setCountList] = useState<{ [key: string]: number }>({});
   const [onlineList, setOnlineList] = useState<number[]>([]);
@@ -30,6 +32,21 @@ const DMList: FC = () => {
   const toggleChannelCollapse = useCallback(() => {
     setChannelCollapse((prev) => !prev);
   }, []);
+
+  useEffect(() => {
+    console.log('DMList: workspace changed', workspace);
+    setOnlineList([]);
+  }, [socket]);
+
+  useEffect(() => {
+    socket?.on('onlineList', (data: number[]) => {
+      setOnlineList(data);
+    });
+    return () => {
+      socket?.off('onLineList');
+    };
+  }, [socket]);
+
   const resetCount = useCallback(
     (id) => () => {
       setCountList((list) => {
