@@ -80,7 +80,10 @@ const Channel = () => {
   const onMessage = useCallback(
     (data: IChat) => {
       // id는 상대방 아이디
-      if (data.Channel.name === channel && (data.content.startsWith('uploads\\') || data.UserId !== myData?.id)) {
+      if (
+        data.Channel.name === channel &&
+        (data.content.startsWith('uploads\\') || data.content.startsWith('uploads/') || data.UserId !== myData?.id)
+      ) {
         mutateChat((chatData) => {
           chatData?.[0].unshift(data);
           return chatData;
@@ -150,6 +153,7 @@ const Channel = () => {
         // Use DataTransferItemList interface to access the file(s)
         for (let i = 0; i < e.dataTransfer.items.length; i++) {
           // If dropped items aren't files, reject them
+          console.log(e.dataTransfer.items[i]);
           if (e.dataTransfer.items[i].kind === 'file') {
             const file = e.dataTransfer.items[i].getAsFile();
             console.log(e, '.... file[' + i + '].name = ' + file.name);
@@ -165,6 +169,7 @@ const Channel = () => {
       }
       axios.post(`/api/workspaces/${workspace}/channels/${channel}/images`, formData).then(() => {
         setDragOver(false);
+        localStorage.setItem(`${workspace}-${channel}`, new Date().getTime().toString());
       });
     },
     [workspace, channel],
@@ -176,6 +181,10 @@ const Channel = () => {
     setDragOver(true);
   }, []);
 
+  // if (channelsData && !channelData) {
+  //   return <Redirect to={`/workspace/${workspace}/channel/일반`} />;
+  // }
+
   if (!myData || !myData) {
     return null;
   }
@@ -186,7 +195,7 @@ const Channel = () => {
     <Container onDrop={onDrop} onDragOver={onDragOver}>
       <Header>
         <span>#{channel}</span>
-        <div className="header-right">
+        <div style={{ display: 'flex', flex: 1, justifyContent: 'flex-end', alignItems: 'center' }}>
           <span>{channelMembersData?.length}</span>
           <button
             onClick={onClickInviteChannel}
