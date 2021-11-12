@@ -144,6 +144,10 @@ const Channel = () => {
     axios.post(`/api/workspaces/${workspace}/channels/${channel}/images`, formData).then(() => {});
   }, []);
 
+  useEffect(() => {
+    localStorage.setItem(`${workspace}-${channel}`, new Date().getTime().toString());
+  }, [workspace, channel]);
+
   const onDrop = useCallback(
     (e) => {
       e.preventDefault();
