@@ -18,7 +18,7 @@ const EachDM: VFC<Props> = ({ member, isOnline }) => {
   });
   const date = localStorage.getItem(`${workspace}-${member.id}`) || 0;
   const { data: count, mutate } = useSWR<number>(
-    userData ? `/api/workspaces/${workspace}/dms/${member.id}/unreads?ater=${date}` : null,
+    userData ? `/api/workspaces/${workspace}/dms/${member.id}/unreads?after=${date}` : null,
     fetcher,
   );
 

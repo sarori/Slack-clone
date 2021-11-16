@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Container, Header } from '@pages/DirectMessage/styles';
-import { useParams } from 'react-router';
+import { Redirect, useParams } from 'react-router';
 import useSWR, { useSWRInfinite } from 'swr';
 import fetcher from '@utils/fetcher';
 import ChatBox from '@components/ChatBox';
@@ -14,24 +14,35 @@ import useSocket from '@hooks/useSocket';
 import InviteChannelModal from '@components/InviteChannelModal';
 import { DragOver } from './styles';
 
+const PAGE_SIZE = 20;
 const Channel = () => {
   const { workspace, channel } = useParams<{ workspace: string; channel: string }>();
   const { data: myData } = useSWR('/api/users', fetcher);
+  const { data: channelsData } = useSWR<IChannel[]>(`/api/workspaces/${workspace}/channels`, fetcher);
   const [chat, onChangeChat, setChat] = useInput('');
   const { data: channelData } = useSWR<IChannel>(`/api/workspaces/${workspace}/channels/${channel}`, fetcher);
   const {
     data: chatData,
     mutate: mutateChat,
-    revalidate,
     setSize,
   } = useSWRInfinite<IChat[]>(
-    (index) => `/api/workspaces/${workspace}/channels/${channel}/chats?perPage=20&page=${index + 1}`,
+    (index) => `/api/workspaces/${workspace}/channels/${channel}/chats?perPage=${PAGE_SIZE}&page=${index + 1}`,
     fetcher,
+    {
+      onSuccess(data) {
+        if (data?.length === 1) {
+          setTimeout(() => {
+            scrollbarRef.current?.scrollToBottom();
+          }, 100);
+        }
+      },
+    },
   );
   const { data: channelMembersData } = useSWR<IUser[]>(
     myData ? `/api/workspaces/${workspace}/channels/${channel}/members` : null,
     fetcher,
   );
+
   const [socket] = useSocket(workspace);
   const isEmpty = chatData?.[0]?.length === 0;
   const isReachingEnd = isEmpty || (chatData && chatData[chatData.length - 1]?.length < 20) || false;
@@ -61,20 +72,21 @@ const Channel = () => {
           });
           return prevChatData;
         }, false).then(() => {
+          localStorage.setItem(`${workspace}-${channel}`, new Date().getTime().toString());
           setChat('');
-          scrollbarRef.current?.scrollToBottom();
+          if (scrollbarRef.current) {
+            console.log('scrollToBottom!', scrollbarRef.current?.getValues());
+            scrollbarRef.current.scrollToBottom();
+          }
         });
         axios
           .post(`/api/workspaces/${workspace}/channels/${channel}/chats`, {
-            content: chat,
-          })
-          .then(() => {
-            revalidate();
+            content: savedChat,
           })
           .catch(console.error);
       }
     },
-    [chat, chatData, myData, channelData, workspace, channel],
+    [chat, workspace, channel, channelData, myData, chatData, mutateChat, setChat],
   );
 
   const onMessage = useCallback(
@@ -185,9 +197,9 @@ const Channel = () => {
     setDragOver(true);
   }, []);
 
-  // if (channelsData && !channelData) {
-  //   return <Redirect to={`/workspace/${workspace}/channel/일반`} />;
-  // }
+  if (channelsData && !channelData) {
+    return <Redirect to={`/workspace/${workspace}/channel/일반`} />;
+  }
 
   if (!myData || !myData) {
     return null;

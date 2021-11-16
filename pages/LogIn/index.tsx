@@ -26,27 +26,24 @@ const LogIn = () => {
         )
         .then((response) => {
           // mutate(response.data, false);
-          revalidate();
+          // revalidate();
+          mutate();
         })
         .catch((error) => {
           setLogInError(error.response?.data?.statusCode === 401);
         });
     },
-    [email, password],
+    [email, password, mutate],
   );
 
-  if (data === undefined) {
-    return <div>Loading...</div>;
-  }
-
-  if (data) {
-    return <Redirect to="/workspace/sleact/channel/일반" />;
-  }
-
-  // if (!error && userData) {
-  //   console.log('로그인됨', userData);
+  // if (data) {
   //   return <Redirect to="/workspace/sleact/channel/일반" />;
   // }
+
+  if (!error && data) {
+    console.log('로그인됨', data);
+    return <Redirect to="/workspace/sleact/channel/일반" />;
+  }
 
   return (
     <div id="container">
