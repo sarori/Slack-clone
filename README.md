@@ -9,7 +9,7 @@ Invite users into workspace for channel and dm and enable to create channel and 
 
 <figure>
 <p align="center">
-    <!-- <img src="https://firebasestorage.googleapis.com/v0/b/resume-be9ab.appspot.com/o/twittervideo.gif?alt=media&token=817b693a-4158-4cf4-94d0-72882223c4fd" alt="twitter-video" width="450px"  height="500px"></p> -->
+    <img src="https://firebasestorage.googleapis.com/v0/b/resume-be9ab.appspot.com/o/slackvideo.gif?alt=media&token=a67f4ab4-6ba6-4c7d-bbc5-b4bd81642cd7" alt="slack-video" width="85%"  ></p>
 </figure>
 
 ## Skills
